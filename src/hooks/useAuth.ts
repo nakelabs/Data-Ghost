@@ -15,15 +15,28 @@ export function useAuth() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Set a timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      console.warn('Auth timeout - setting loading to false')
+      setLoading(false)
+    }, 5000) // 5 second timeout
+
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchUserProfile(session.user.id)
-      } else {
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        clearTimeout(timeoutId)
+        setUser(session?.user ?? null)
+        if (session?.user) {
+          fetchUserProfile(session.user.id)
+        } else {
+          setLoading(false)
+        }
+      })
+      .catch((error) => {
+        clearTimeout(timeoutId)
+        console.error('Error getting session:', error)
         setLoading(false)
-      }
-    })
+      })
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -50,10 +63,16 @@ export function useAuth() {
         .maybeSingle()
 
       if (error) {
-        throw error
+        // If it's a table doesn't exist error, that's okay - just continue without profile
+        if (error.message.includes('relation "user_profiles" does not exist')) {
+          console.warn('user_profiles table does not exist yet - continuing without profile')
+          setUserProfile(null)
+        } else {
+          throw error
+        }
+      } else {
+        setUserProfile(data || null)
       }
-
-      setUserProfile(data || null)
     } catch (error) {
       console.error('Error fetching user profile:', error)
       setUserProfile(null)
