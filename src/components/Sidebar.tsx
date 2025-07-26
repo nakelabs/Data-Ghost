@@ -60,7 +60,7 @@ export function Sidebar() {
 
   return (
     <>
-      <div className="w-80 bg-white border-r border-gray-200 h-screen overflow-y-auto">
+      <div className="w-80 bg-white border-r border-gray-200 min-h-screen overflow-y-auto">
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-3 mb-4">

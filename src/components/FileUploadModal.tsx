@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Upload, File, Trash2, Save } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../hooks/useAuth'
 
 interface FileUploadModalProps {
   isOpen: boolean
@@ -16,6 +18,7 @@ interface UploadedFile {
 }
 
 export function FileUploadModal({ isOpen, onClose, onSave }: FileUploadModalProps) {
+  const { userProfile } = useAuth()
   const [files, setFiles] = useState<UploadedFile[]>([])
   const [action, setAction] = useState<'Delete' | 'Transfer' | 'Archive'>('Archive')
   const [recipientEmail, setRecipientEmail] = useState('')
@@ -81,23 +84,42 @@ export function FileUploadModal({ isOpen, onClose, onSave }: FileUploadModalProp
     }
 
     try {
-      // Convert files to base64 for storage (in a real app, you'd upload to cloud storage)
+      // Upload files to Supabase storage
       for (const uploadedFile of files) {
-        const reader = new FileReader()
-        const fileData = await new Promise<string>((resolve) => {
-          reader.onload = () => resolve(reader.result as string)
-          reader.readAsDataURL(uploadedFile.file)
-        })
+        if (!userProfile?.username) {
+          throw new Error('User profile not found')
+        }
+
+        // Create file path: username/filename
+        const filePath = `${userProfile.username}/${uploadedFile.name}`
+        
+        // Upload file to Supabase storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('digital-assets')
+          .upload(filePath, uploadedFile.file, {
+            cacheControl: '3600',
+            upsert: false
+          })
+
+        if (uploadError) {
+          throw new Error(`Failed to upload ${uploadedFile.name}: ${uploadError.message}`)
+        }
+
+        // Get public URL for the uploaded file
+        const { data: { publicUrl } } = supabase.storage
+          .from('digital-assets')
+          .getPublicUrl(filePath)
 
         const assetData = {
           platform_name: `File: ${uploadedFile.name}`,
           action,
           recipient_email: action === 'Transfer' ? recipientEmail : null,
           time_delay: timeDelay,
-          file_data: fileData,
+          file_data: publicUrl,
           file_name: uploadedFile.name,
           file_size: uploadedFile.size,
-          file_type: uploadedFile.type
+          file_type: uploadedFile.type,
+          storage_path: filePath
         }
 
         await onSave(assetData)
@@ -110,7 +132,7 @@ export function FileUploadModal({ isOpen, onClose, onSave }: FileUploadModalProp
       setTimeDelay('00:00:00')
       onClose()
     } catch (err: any) {
-      setError(err.message || 'An error occurred while uploading files')
+      setError(err.message || 'Failed to upload files. Please try again.')
     } finally {
       setLoading(false)
     }

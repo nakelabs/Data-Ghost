@@ -14,6 +14,7 @@ export interface DigitalAsset {
   file_name?: string
   file_size?: string
   file_type?: string
+  storage_path?: string
 }
 
 export function useDigitalAssets() {

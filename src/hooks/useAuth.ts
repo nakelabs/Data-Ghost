@@ -183,8 +183,8 @@ export function useAuth() {
           .maybeSingle()
 
         if (!existingProfile) {
-          // Create profile with email username if none exists
-          const defaultUsername = data.user.email?.split('@')[0] || 'User'
+          // Create profile with username from user metadata or email fallback
+          const defaultUsername = data.user.user_metadata?.username || data.user.email?.split('@')[0] || 'User'
           await supabase
             .from('user_profiles')
             .insert([{ id: data.user.id, username: defaultUsername }])
