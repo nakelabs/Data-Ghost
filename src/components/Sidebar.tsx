@@ -11,7 +11,8 @@ import {
   Trash, 
   Share,
   Search,
-  Filter
+  Filter,
+  X
 } from 'lucide-react'
 import { useDigitalAssets } from '../hooks/useDigitalAssets'
 import { AssetModal } from './AssetModal'
@@ -21,7 +22,12 @@ import { AssetCard } from './AssetCard'
 import { generateDigitalWillPDF } from '../utils/pdfGenerator'
 import { useAuth } from '../hooks/useAuth'
 
-export function Sidebar() {
+interface SidebarProps {
+  isOpen?: boolean
+  onClose?: () => void
+}
+
+export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
   const { userProfile } = useAuth()
   const { assets, loading, addAsset, updateAsset, deleteAsset } = useDigitalAssets()
   const [showAssetModal, setShowAssetModal] = useState(false)
@@ -58,9 +64,100 @@ export function Sidebar() {
     Archive: assets.filter(a => a.action === 'Archive').length
   }
 
+  const handleAssetSave = async (data: any) => {
+    if (editingAsset) {
+      await updateAsset(editingAsset, data)
+    } else {
+      await addAsset(data)
+    }
+  }
+
   return (
     <>
-      <div className="w-80 bg-white border-r border-gray-200 min-h-screen overflow-y-auto">
+      {/* Mobile Sidebar Overlay */}
+      {isOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50"
+            onClick={onClose}
+          />
+          
+          {/* Mobile Sidebar */}
+          <motion.div
+            initial={{ x: -320 }}
+            animate={{ x: 0 }}
+            exit={{ x: -320 }}
+            transition={{ type: "spring", damping: 20 }}
+            className="relative w-80 bg-white shadow-xl overflow-y-auto"
+          >
+            {/* Mobile Close Button */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Digital Assets</h2>
+              <button
+                onClick={onClose}
+                aria-label="Close sidebar"
+                className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Mobile Sidebar Content */}
+            <div className="p-4">
+              {/* Action Buttons */}
+              <div className="space-y-2 mb-4">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setShowAssetModal(true)
+                    onClose?.()
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Asset
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setShowFileUpload(true)
+                    onClose?.()
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors text-sm"
+                >
+                  <Upload className="w-4 h-4" />
+                  Upload Files
+                </motion.button>
+              </div>
+              
+              {/* Quick Stats */}
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="text-center p-2 bg-red-50 rounded-lg">
+                  <div className="text-lg font-bold text-red-600">{assetCounts.Delete}</div>
+                  <div className="text-xs text-red-600">Delete</div>
+                </div>
+                <div className="text-center p-2 bg-blue-50 rounded-lg">
+                  <div className="text-lg font-bold text-blue-600">{assetCounts.Transfer}</div>
+                  <div className="text-xs text-blue-600">Transfer</div>
+                </div>
+                <div className="text-center p-2 bg-yellow-50 rounded-lg">
+                  <div className="text-lg font-bold text-yellow-600">{assetCounts.Archive}</div>
+                  <div className="text-xs text-yellow-600">Archive</div>
+                </div>
+              </div>
+              
+              <p className="text-sm text-gray-500 text-center">{assets.length} total assets</p>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block w-64 xl:w-72 bg-white border-r border-gray-200 min-h-screen overflow-y-auto flex-shrink-0">
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-3 mb-4">
@@ -136,6 +233,7 @@ export function Sidebar() {
             <select
               value={filterAction}
               onChange={(e) => setFilterAction(e.target.value)}
+              aria-label="Filter assets by action"
               className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
             >
               <option value="all">All Actions ({assetCounts.all})</option>
@@ -211,7 +309,7 @@ export function Sidebar() {
           setShowAssetModal(false)
           setEditingAsset(null)
         }}
-        onSave={editingAsset ? updateAsset : addAsset}
+        onSave={handleAssetSave}
         asset={editingAsset ? assets.find(a => a.id === editingAsset) : undefined}
       />
 
