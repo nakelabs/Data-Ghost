@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, Lock, User, Shield, ArrowLeft, CheckCircle } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 
@@ -34,26 +33,26 @@ export function AuthForm() {
 
     // Client-side validation
     if (!validateEmail(email)) {
-      setError('Please enter a valid email address')
+      setError('Please enter a valid email address.')
       setLoading(false)
       return
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long')
+      setError('Password must be at least 6 characters long.')
       setLoading(false)
       return
     }
 
     if (!isLogin) {
       if (username.trim().length < 3) {
-        setError('Username must be at least 3 characters long')
+        setError('Username must be at least 3 characters long.')
         setLoading(false)
         return
       }
 
       if (!/^[a-zA-Z0-9_]+$/.test(username.trim())) {
-        setError('Username can only contain letters, numbers, and underscores')
+        setError('Username can only contain letters, numbers, and underscores.')
         setLoading(false)
         return
       }
@@ -84,43 +83,37 @@ export function AuthForm() {
 
   if (showEmailConfirmation) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-white flex flex-col pt-32 px-6 font-sans">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-md w-full"
+          transition={{ duration: 0.6 }}
+          className="max-w-md w-full mx-auto"
         >
-          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-green-600" />
-              </div>
-            </div>
-            
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">
-              Check Your Email
+          <div className="text-center mb-12">
+            <h1 className="text-3xl font-medium tracking-tight text-zinc-900 mb-4">
+              Check your inbox
             </h1>
-            
-            <p className="text-gray-600 mb-6">
-              We've sent a confirmation link to <strong>{email}</strong>. 
-              Please check your email and click the link to verify your account before signing in.
+            <p className="text-zinc-500 font-light leading-relaxed">
+              We've sent a confirmation link to <strong className="font-medium">{email}</strong>. 
+              Please verify your address to continue.
             </p>
+          </div>
+          
+          <div className="flex flex-col gap-4">
+            <button
+              onClick={() => setShowEmailConfirmation(false)}
+              className="w-full py-3 bg-zinc-900 text-white rounded-full font-medium hover:bg-zinc-800 transition-colors"
+            >
+              Back to Sign In
+            </button>
             
-            <div className="space-y-4">
-              <button
-                onClick={() => setShowEmailConfirmation(false)}
-                className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-              >
-                Back to Sign In
-              </button>
-              
-              <Link
-                to="/"
-                className="block w-full px-4 py-3 text-gray-600 bg-gray-100 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-              >
-                Return to Home
-              </Link>
-            </div>
+            <Link
+              to="/"
+              className="w-full py-3 text-center text-zinc-900 bg-transparent border border-zinc-200 rounded-full font-medium hover:border-zinc-300 transition-colors"
+            >
+              Return Home
+            </Link>
           </div>
         </motion.div>
       </div>
@@ -128,140 +121,113 @@ export function AuthForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full"
-      >
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="mb-6">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Home
-            </Link>
-          </div>
+    <div className="min-h-screen bg-white flex flex-col text-zinc-900 font-sans">
+      <div className="px-6 py-8 flex justify-start w-full max-w-7xl mx-auto">
+        <Link
+          to="/"
+          className="text-sm font-medium text-zinc-400 hover:text-zinc-900 transition-colors tracking-tight"
+        >
+          DataGhost
+        </Link>
+      </div>
 
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
-                <Shield className="w-8 h-8 text-white" />
-              </div>
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900">DataGhost</h1>
-            <p className="text-gray-600 mt-2">
-              {isLogin ? 'Welcome back' : 'Create your account'}
+      <div className="flex-1 flex flex-col justify-center px-6 pb-24">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-sm w-full mx-auto"
+        >
+          <div className="mb-10 text-center">
+            <h1 className="text-3xl font-medium tracking-tight mb-2">
+              {isLogin ? 'Sign in' : 'Create an account'}
+            </h1>
+            <p className="text-zinc-500 font-light hidden sm:block">
+              {isLogin ? 'Enter your details to proceed.' : 'Set up your credentials below.'}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs font-medium text-zinc-600 uppercase tracking-wider mb-2">
                   Username
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    placeholder="Choose a username"
-                    required={!isLogin}
-                    minLength={3}
-                    maxLength={30}
-                    pattern="[a-zA-Z0-9_]+"
-                    title="Username can only contain letters, numbers, and underscores"
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 transition-colors placeholder:text-zinc-400"
+                  placeholder="data_ghost"
+                  required={!isLogin}
+                  minLength={3}
+                  maxLength={30}
+                  pattern="[a-zA-Z0-9_]+"
+                  title="Username can only contain letters, numbers, and underscores"
+                />
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-zinc-600 uppercase tracking-wider mb-2">
                 Email
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  placeholder="Enter your email"
-                  required
-                  autoComplete="email"
-                />
-              </div>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 transition-colors placeholder:text-zinc-400"
+                placeholder="address@example.com"
+                required
+                autoComplete="email"
+              />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs font-medium text-zinc-600 uppercase tracking-wider mb-2">
                 Password
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  placeholder="Enter your password"
-                  required
-                  minLength={6}
-                  autoComplete={isLogin ? "current-password" : "new-password"}
-                />
-              </div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-zinc-900 focus:border-zinc-900 transition-colors placeholder:text-zinc-400"
+                placeholder="••••••••"
+                required
+                minLength={6}
+                autoComplete={isLogin ? "current-password" : "new-password"}
+              />
             </div>
 
             {error && (
               <motion.div
-                initial={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
+                className="text-red-500 text-sm font-medium tracking-tight"
               >
                 {error}
               </motion.div>
             )}
 
-            <motion.button
+            <button
               type="submit"
               disabled={loading}
-              whileHover={{ scale: loading ? 1 : 1.02 }}
-              whileTap={{ scale: loading ? 1 : 0.98 }}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-zinc-900 text-white py-3 border border-transparent rounded-full text-sm font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed tracking-wide"
             >
-              {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Processing...
-                </div>
-              ) : (
-                isLogin ? 'Sign In' : 'Sign Up'
-              )}
-            </motion.button>
+              {loading ? 'Authenticating...' : (isLogin ? 'Sign In' : 'Sign Up')}
+            </button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-8 text-center border-t border-zinc-100 pt-8">
             <button
               onClick={switchMode}
-              className="text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
             >
-              {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+              {isLogin ? "Don't have an account? Sign up." : 'Already have an account? Sign in.'}
             </button>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   )
 }
